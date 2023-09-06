@@ -13,16 +13,22 @@ namespace v8 {
 namespace internal {
 
 template <typename T>
-Handle<T> GlobalHandles::Create(T value) {
+Handle<T> GlobalHandles::Create(Tagged<T> value) {
   static_assert(std::is_base_of<Object, T>::value, "static type violation");
   // The compiler should only pick this method if T is not Object.
   static_assert(!std::is_same<Object, T>::value, "compiler error");
-  return Handle<T>::cast(Create(Object(value)));
+  return Handle<T>::cast(Create(Tagged<Object>(value)));
 }
 
 template <typename T>
-T GlobalHandleVector<T>::Pop() {
-  T obj = T::cast(Object(locations_.back()));
+Handle<T> GlobalHandles::Create(T value) {
+  static_assert(kTaggedCanConvertToRawObjects);
+  return Create(Tagged<T>(value));
+}
+
+template <typename T>
+Tagged<T> GlobalHandleVector<T>::Pop() {
+  Tagged<T> obj = T::cast(Tagged<Object>(locations_.back()));
   locations_.pop_back();
   return obj;
 }
